@@ -1,0 +1,461 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+	<head>
+		<style type="text/css">
+			body { font-size: 80%; font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif; }
+			ul#tabs { list-style-type: none; margin: 30px 0 0 0; padding: 0 0 0.3em 0; }
+			ul#tabs li { display: inline; }
+			ul#tabs li a { color: #42454a; background-color: #dedbde; border: 1px solid #c9c3ba; border-bottom: none; padding: 0.3em; text-decoration: none; }
+			ul#tabs li a:hover { background-color: #f1f0ee; }
+			ul#tabs li a.selected { color: #000; background-color: #f1f0ee; font-weight: bold; padding: 0.7em 0.3em 0.38em 0.3em; }
+			div.tabContent { border: 1px solid #c9c3ba; padding: 0.5em; background-color: #f1f0ee; }
+			div.tabContent.hide { display: none; }
+		</style>
+		<script type="text/javascript">
+			var tabLinks=new Array();var contentDivs=new Array();function init(){var tabListItems=document.getElementById('tabs').childNodes;for(var i=0;i<tabListItems.length;i++){if(tabListItems[i].nodeName=="LI"){var tabLink=getFirstChildWithTagName(tabListItems[i],'A');var id=getHash(tabLink.getAttribute('href'));tabLinks[id]=tabLink;contentDivs[id]=document.getElementById(id)}}var i=0;for(var id in tabLinks){tabLinks[id].onclick=showTab;tabLinks[id].onfocus=function(){this.blur()};if(i==0)tabLinks[id].className='selected';i++}var i=0;for(var id in contentDivs){if(i!=0)contentDivs[id].className='tabContent hide';i++}}function showTab(){var selectedId=getHash(this.getAttribute('href'));for(var id in contentDivs){if(id==selectedId){tabLinks[id].className='selected';contentDivs[id].className='tabContent'}else{tabLinks[id].className='';contentDivs[id].className='tabContent hide'}}return false}function getFirstChildWithTagName(element,tagName){for(var i=0;i<element.childNodes.length;i++){if(element.childNodes[i].nodeName==tagName)return element.childNodes[i]}}function getHash(url){var hashPos=url.lastIndexOf('#');return url.substring(hashPos+1)}
+		</script>
+
+		<script type="text/javascript">
+			function connect()
+			{
+				var url= document.getElementById("url_set").value;
+				window.nowuseeme.connect(url);
+			}
+			function getLatestErrorCode()
+			{
+				document.getElementById('last_code_tag').innerHTML= 
+					window.nowuseeme.getLatestErrorCode();
+			}
+			function getLatestErrorText()
+			{
+				document.getElementById('last_text_tag').innerHTML= 
+					window.nowuseeme.getLatestErrorText();
+			}
+			function videoResolutionWidthGet()
+		    {
+				document.getElementById('vwidth_tag').innerHTML= 
+					window.nowuseeme.videoResolutionWidthGet();
+		    }
+		    function videoResolutionHeightGet()
+		    {
+				document.getElementById('vheight_tag').innerHTML= 
+					window.nowuseeme.videoResolutionHeightGet();
+		    }
+		    function videoResolutionsGet()
+		    {
+				document.getElementById('resolutions_tag').innerHTML= 
+					window.nowuseeme.videoResolutionsGet();
+		    }
+		    function videoResolutionSet()
+		    {
+				var w= document.getElementById('set_width').value;
+				var h= document.getElementById("set_height").value;
+				document.getElementById('resolution_set_res').innerHTML= 
+					window.nowuseeme.videoResolutionSet(parseInt(w), parseInt(h));
+		    }
+			function videoResolutionTest()
+			{
+				var w= document.getElementById('test_width').value;
+				var h= document.getElementById('test_height').value;
+				var k= document.getElementById('keep_ratio').value;
+				document.getElementById('resolution_test_res').innerHTML= 
+					window.nowuseeme.videoResolutionTest(parseInt(w), parseInt(h), parseInt(k));
+			}
+			function videoFPSGet()
+			{
+				document.getElementById('fpsget_tag').innerHTML= 
+					window.nowuseeme.videoFPSGet();
+			}
+			function videoFPSSet()
+			{
+				var fps= document.getElementById("fps_set").value;
+				document.getElementById('fpsset_tag').innerHTML= 
+					window.nowuseeme.videoFPSSet(parseInt(fps));
+			}
+			function videoKeyFrameIntervalGet()
+			{
+				document.getElementById('gopget_tag').innerHTML= 
+					window.nowuseeme.videoKeyFrameIntervalGet();
+			}
+			function videoKeyFrameIntervalSet()
+			{
+				var gop= document.getElementById("gop_set").value;
+				document.getElementById('gopset_tag').innerHTML= 
+					window.nowuseeme.videoKeyFrameIntervalSet(parseInt(gop));
+			}
+			function videoCodecNameGet()
+			{
+				document.getElementById('vcodec_name_tag').innerHTML= 
+					window.nowuseeme.videoCodecNameGet();
+			}
+			function videoCodecsGet()
+			{
+				document.getElementById('vcodecs_list_tag').innerHTML= 
+					window.nowuseeme.videoCodecsGet();
+			}
+			function videoCodecSet()
+			{
+				var c= document.getElementById("vcodec_set").value;
+				document.getElementById('vcodec_set_tag').innerHTML= 
+					window.nowuseeme.videoCodecSet(c);
+			}
+			function videoCamerasGet()
+			{
+				document.getElementById('vcameras_get_tag').innerHTML= 
+					window.nowuseeme.videoCamerasGet();
+			}
+			function videoCameraDetailsGet()
+			{
+				var id= document.getElementById("vcamera_curr_id_get").value;
+				document.getElementById('vcamera_details_get_tag').innerHTML= 
+					window.nowuseeme.videoCameraDetailsGet(parseInt(id));
+			}
+			function videoCameraGet()
+			{
+				document.getElementById('vcamera_get_tag').innerHTML= 
+					window.nowuseeme.videoCameraGet();
+			}
+			function videoCameraSet()
+			{
+				var id= document.getElementById("vcamera_set").value;
+				document.getElementById('vcamera_set_tag').innerHTML= 
+					window.nowuseeme.videoCameraSet(parseInt(id));
+			}
+			function videoBandwidthSet()
+			{
+				var bw= document.getElementById("vbw_set").value;
+				document.getElementById('vbw_set_tag').innerHTML= 
+					window.nowuseeme.videoBandwidthSet(parseInt(bw));
+			}
+			function videoBandwidthGet()
+			{
+				document.getElementById('vbw_get_tag').innerHTML= 
+					window.nowuseeme.videoBandwidthGet();
+			}
+			function videoQualitySet()
+			{
+				var q= document.getElementById("vq_set").value;
+				document.getElementById('vq_set_tag').innerHTML= 
+					window.nowuseeme.videoQualitySet(q);
+			}
+			function videoQualityGet()
+			{
+				document.getElementById('vq_get_tag').innerHTML= 
+					window.nowuseeme.videoQualityGet();
+			}
+			function rateCtrlToleranceSet()
+			{
+				var rc= document.getElementById("rc_set").value;
+				document.getElementById('rc_set_tag').innerHTML= 
+					window.nowuseeme.rateCtrlToleranceSet(parseInt(rc));
+			}
+			function rateCtrlToleranceGet()
+			{
+				document.getElementById('rc_get_tag').innerHTML= 
+					window.nowuseeme.rateCtrlToleranceGet();
+			}
+			function audioCodecNameGet()
+			{
+				document.getElementById('acodec_name_tag').innerHTML= 
+					window.nowuseeme.audioCodecNameGet();
+			}
+			function audioCodecsGet()
+			{
+				document.getElementById('acodecs_list_tag').innerHTML= 
+					window.nowuseeme.audioCodecsGet();
+			}
+			function audioCodecSet()
+			{
+				var c= document.getElementById("acodec_set").value;
+				document.getElementById('acodec_set_tag').innerHTML= 
+					window.nowuseeme.audioCodecSet(c);
+			}
+			function viewVideoDisplay()
+			{
+				window.nowuseeme.viewVideoDisplay(true, parseInt(640), parseInt(360), parseInt(256), parseInt(64) );
+			}
+			function viewVideoHide()
+			{
+				window.nowuseeme.viewVideoDisplay(false, parseInt(640), parseInt(360), parseInt(256), parseInt(64) );
+			}
+			function viewVideoGet()
+			{
+				document.getElementById('viewVideoGet_tag').innerHTML= 
+					window.nowuseeme.viewVideoGet();
+			}
+			function videoPublishStart()
+			{
+				var publish_url= document.getElementById("videoPublishStart_set").value;
+				window.nowuseeme.videoPublishSet(publish_url, true);
+			}
+			function videoPublishStop()
+			{
+				var publish_url= document.getElementById("videoPublishStart_set").value;
+				window.nowuseeme.videoPublishSet(publish_url, false);
+			}
+			function videoPublishGet()
+			{
+				document.getElementById('videoPublishStat_tag').innerHTML= 
+					window.nowuseeme.videoPublishGet();
+			}
+			function onBackgroundStateChange(isBackground)
+			{
+				document.getElementById('onBackgroundStateChange_tag').innerHTML= isBackground;
+			}
+			function onAMFMessage(msg)
+			{
+				document.getElementById('onAMFMessage_tag').innerHTML= msg;
+			}
+			function localPreviewDisplay()
+			{
+				window.nowuseeme.localPreviewDisplay(true, parseInt(352), parseInt(288), parseInt(360), parseInt(64) );
+			}
+			function localPreviewHide()
+			{
+				window.nowuseeme.localPreviewDisplay(false, parseInt(352), parseInt(288), parseInt(360), parseInt(64) );
+			}
+</script>
+
+	</head>
+
+	<body onload="init()">
+
+		<ul id="tabs">
+			<li><a href="#General">General/Mux</a></li>
+			<li><a href="#VideoConfs">Video configuration</a></li>
+			<li><a href="#AudioConfs">Audio configuration</a></li>
+			<li><a href="#Events">Events</a></li>
+			<li><a href="#AVPlayer">A/V Player</a></li>
+			<li><a href="#Preview">Preview</a></li>
+		</ul>
+
+		<div class="tabContent" id="General">
+			<h3>General options / Multiplex configuration</h2>
+			<div>
+				<table><tr>
+				<form action="#" style="display: none">
+			        <div>
+			        <td><input type="button" value="connect" onclick="connect();" /></td>
+			        <td><input type="text" id="url_set" placeholder="(e.g. rtmp://10.0.0.103:1935/myapp/mystream)" style="width:400" /></td>
+			        </div>
+				</form>
+				</tr></table>
+				<table><tr>
+					<td><input type="button" onclick="getLatestErrorCode()" value="getLatestErrorCode"/></td>
+					<td><div id="last_code_tag"></div></td>
+				</tr></table>
+				<table><tr>
+					<td><input type="button" onclick="getLatestErrorText()" value="getLatestErrorText"/></td>
+					<td><div id="last_text_tag"></div></td>
+				</tr></table>
+			</div>
+		</div>
+
+		<div class="tabContent" id="VideoConfs">
+			<h3>Video configuration</h3>
+			<div>
+				<table><tr>
+					<td><input type="button" onclick="videoResolutionWidthGet()" value="videoResolutionWidthGet"/></td>
+					<td><div id="vwidth_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoResolutionHeightGet()" value="videoResolutionHeightGet"/></td>
+			        <td><div id="vheight_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoResolutionsGet()" value="videoResolutionsGet"/></td>
+			        <td><div id="resolutions_tag"></div></td>
+				</tr></table>
+				<table><tr>
+				<form action="#" style="display: none">
+					<div>
+					<td><input type="button" value="videoResolutionSet" onclick="videoResolutionSet();" /></td>
+					<td><input type=int id="set_width" placeholder="(e.g. 352)" style="width:100" /></td>
+					<td><input type=int id="set_height" placeholder="(e.g. 288)" style="width:100" /></td>
+				        <td><div id="resolution_set_res"></div></td>
+					</div>
+				</form>
+				</tr></table>
+				<table><tr>
+				<form action="#" style="display: none">
+			        <div>
+			        <td><input type="button" value="videoResolutionTest" onclick="videoResolutionTest();" /></td>
+			        <td><input type=int id="test_width" placeholder="(e.g. 352)" style="width:100" /></td>
+			        <td><input type=int id="test_height" placeholder="(e.g. 288)" style="width:100" /></td>
+					<td><input type=int id="keep_ratio" placeholder="(e.g. 1 / 0)" style="width:100" /></td>
+			        <td><div id="resolution_test_res"></div></td>
+			        </div>
+				</form>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoFPSGet()" value="videoFPSGet"/></td>
+			        <td><div id="fpsget_tag"></div></td>
+				</tr></table>
+				<table><tr>
+				<form action="#" style="display: none">
+			        <div>
+			        <td><input type="button" value="videoFPSSet" onclick="videoFPSSet();" /></td>
+			        <td><input type=int id="fps_set" placeholder="(e.g. 15)" style="width:100" /></td>
+			        <td><div id="fpsset_tag"></div></td>
+			        </div>
+				</form>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoKeyFrameIntervalGet()" value="videoKeyFrameIntervalGet"/></td>
+			        <td><div id="gopget_tag"></div></td>
+				</tr></table>
+				<table><tr>
+				<form action="#" style="display: none">
+			        <div>
+			        <td><input type="button" value="videoKeyFrameIntervalSet" onclick="videoKeyFrameIntervalSet();" /></td>
+			        <td><input type=int id="gop_set" placeholder="(e.g. 15)" style="width:100" /></td>
+			        <td><div id="gopset_tag"></div></td>
+			        </div>
+				</form>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoCodecNameGet()" value="videoCodecNameGet"/></td>
+			        <td><div id="vcodec_name_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoCodecsGet()" value="videoCodecsGet"/></td>
+			        <td><div id="vcodecs_list_tag"></div></td>
+				</tr></table>
+				<table><tr>
+					<td><input type="button" onclick="videoCodecSet()" value="videoCodecSet"/></td>
+					<td><select name="Set video codec" id="vcodec_set" >
+						<option value="h264">H.264</option>
+						<option value="flv1">Sorenson Spark (flv1)</option>
+					</select></td>
+					<td><div id="vcodec_set_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoCamerasGet()" value="videoCamerasGet"/></td>
+			        <td><div id="vcameras_get_tag"></div></td>
+				</tr></table>
+				<table><tr>
+				<table><tr>
+					<td><input type="button" onclick="videoCameraDetailsGet()" value="videoCameraDetailsGet"/></td>
+					<td><input type=int id="vcamera_curr_id_get" placeholder="(e.g. 0)" style="width:100" /></td>
+				    <td><div id="vcamera_details_get_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoCameraGet()" value="videoCameraGet"/></td>
+			        <td><div id="vcamera_get_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoCameraSet()" value="videoCameraSet"/></td>
+			        <td><input type=int id="vcamera_set" placeholder="(e.g. 0)" style="width:100" /></td>
+			        <td><div id="vcamera_set_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoBandwidthSet()" value="videoBandwidthSet"/></td>
+			        <td><input type=int id="vbw_set" placeholder="(e.g. 409600)" style="width:100" /></td>
+			        <td><div id="vbw_set_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoBandwidthGet()" value="videoBandwidthGet"/></td>
+			        <td><div id="vbw_get_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="rateCtrlToleranceSet()" value="rateCtrlToleranceSet"/></td>
+			        <td><input type=int id="rc_set" placeholder="(e.g. 25)[%]" style="width:100" /></td>
+			        <td><div id="rc_set_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="rateCtrlToleranceGet()" value="rateCtrlToleranceGet"/></td>
+			        <td><div id="rc_get_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoQualitySet()" value="videoQualitySet"/></td>
+			        <td><input type="text" id="vq_set" placeholder="(e.g. q1/q2/q3)" style="width:100" /></td>
+			        <td><div id="vq_set_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoQualityGet()" value="videoQualityGet"/></td>
+			        <td><div id="vq_get_tag"></div></td>
+				</tr></table>
+			</div>
+		</div>
+
+		<div class="tabContent" id="AudioConfs">
+			<h3>Audio configuration</h3>
+			<div>
+				<table><tr>
+			        <td><input type="button" onclick="audioCodecNameGet()" value="audioCodecNameGet"/></td>
+			        <td><div id="acodec_name_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="audioCodecsGet()" value="audioCodecsGet"/></td>
+			        <td><div id="acodecs_list_tag"></div></td>
+				</tr></table>
+				<table><tr>
+					<td><input type="button" onclick="audioCodecSet()" value="audioCodecSet"/></td>
+					<td><select name="Set audio codec" id="acodec_set" >
+						<option value="aac">AAC</option>
+						<option value="mp3">MP3</option>
+					</select></td>
+					<td><div id="acodec_set_tag"></div></td>
+				</tr></table>
+			</div>
+		</div>
+
+		<div class="tabContent" id="Events">
+			<h3>Events</h3>
+			<div>
+				<table><tr>
+			        <td><h5>onAMFMessage() result:</h5></td>
+			        <td><div id="onAMFMessage_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><h5>onBackgroundStateChange() result:</h5></td>
+			        <td><div id="onBackgroundStateChange_tag"></div></td>
+				</tr></table>
+			</div>
+		</div>
+
+		<div class="tabContent" id="AVPlayer">
+			<h3>A/V player</h3>
+			<div>
+				<table><tr>
+			        <td><h5>Player set to: w= 640, h= 360, x= 256, y= 64</h5></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="viewVideoDisplay()" value="viewVideoDisplay"/></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="viewVideoHide()" value="viewVideoHide"/></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="viewVideoGet()" value="viewVideoGet"/></td>
+			        <td><div id="viewVideoGet_tag"></div></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoPublishStart()" value="start"/></td>
+					<td><input type="text" id="videoPublishStart_set" placeholder="(e.g. rtmp://10.0.0.103:1935/myapp/mystream)" style="width:400" /></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="videoPublishStop()" value="stop"/></td>
+			        <td><input type="button" onclick="videoPublishGet()" value="videoPublishGet"/></td>
+			        <td><div id="videoPublishStat_tag"></div></td>
+				</tr></table>
+			</div>
+		</div>
+
+		<div class="tabContent" id="Preview">
+			<h3>Camera Preview</h3>
+			<div>
+				<table><tr>
+			        <td><h5>Preview example set to: w= 352, h= 288, x= 360, y= 64</h5></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="localPreviewDisplay()" value="localPreviewDisplay(true, w:352, h:288, x:360, y:64)"/></td>
+				</tr></table>
+				<table><tr>
+			        <td><input type="button" onclick="localPreviewHide()" value="localPreviewDisplay(false, w:352, h:288, x:360, y:64)"/></td>
+				</tr></table>
+			</div>
+		</div>
+
+	</body>
+</html>

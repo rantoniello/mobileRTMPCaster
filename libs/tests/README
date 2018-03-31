@@ -1,0 +1,3 @@
+To execute binary:
+LD_LIBRARY_PATH=../_install_dir_x86/lib/ ./test_rtmpclient ...args...
+

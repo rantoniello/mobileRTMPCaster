@@ -1,0 +1,4 @@
+# COMMON PATHS
+INSTALL_DIR = $(CONFIG_LINUX_MK_PATH)/_install_dir_$(CROSS_ARCH)_android
+
+# ******** GLOBAL CONFIGURATIONS ******** #

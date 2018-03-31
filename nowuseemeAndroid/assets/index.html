@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv=content-type content=text/html;charset=utf-8 />
+    <title>Now you see me</title>
+    <meta name="format-detection" content="telephone=no"/>
+    <link rel="stylesheet" href="file:///android_asset/jquery.mobile.1.4.3.min.css" />
+    <style>
+    	body {
+    		background-color: black;
+    	}
+    	.doPreview,.doPlay {
+    		line-height: 120px; 
+    		text-align: center; 
+    		margin-left: auto; 
+    		margin-right: auto;
+    		margin-top: 10px;
+    		margin-bottom: 5px;
+    		width: 160px; 
+    		height: 120px; 
+    		background-color: #AAA; 
+    		border-color: #AAA;  
+    		border-style: solid; 
+    		border-width: 4px;
+    	}
+    	.stausBox {
+    		line-height: 60px;
+    		text-align: center; 
+    		margin-left: auto; 
+    		margin-right: auto;
+    		margin-top: 10px;
+    		margin-bottom: 5px;
+    		width: 160px; 
+    		height: 120px; 
+/*    		text-align: center; 
+    		margin-left: auto; 
+    		margin-right: auto;
+    		margin-top: 10px;
+    		margin-bottom: 5px;
+    		width: 160px; 
+    		height: 120px; 
+    		background-color: #AAA; 
+    		border-color: #AAA;  
+    		border-style: solid; 
+    		border-width: 4px;*/
+    	}
+    	
+		/* loading animation */
+		.ui-loader {
+		    opacity: 1 !important;
+		    border-width: 0;
+		    background-color: rgba(0,0,0,0);
+		    width: 100px;
+		    height: 100px;
+		    margin-left: -50px;
+		    margin-top: -50px;
+		}
+		.loadingContainer {width: 100px; height: 85px; margin: 0 auto; overflow: hidden;}
+		.loadingContent {width:100px; height: 85px; margin:0 auto; padding-top: 15px;}
+		.loadingCircle {
+		    background-color: rgba(0,0,0,0);
+		    border:5px solid rgba(0,183,229,0.9);
+		    opacity:.9;
+		    border-right:5px solid rgba(0,0,0,0);
+		    border-left:5px solid rgba(0,0,0,0);
+		    border-radius:50px;
+		    box-shadow: 0 0 35px #2187e7;
+		    width:50px;
+		    height:50px;
+		    margin:0 auto;
+		    -moz-animation:spinPulse 1s infinite ease-in-out;
+		    -webkit-animation:spinPulse 1s infinite linear;
+		}
+		.loadingCircle1 {
+		    background-color: rgba(0,0,0,0);
+		    border:5px solid rgba(0,183,229,0.9);
+		    opacity:.9;
+		    border-left:5px solid rgba(0,0,0,0);
+		    border-right:5px solid rgba(0,0,0,0);
+		    border-radius:50px;
+		    box-shadow: 0 0 15px #2187e7;
+		    width:30px;
+		    height:30px;
+		    margin:0 auto;
+		    position:relative;
+		    top:-50px;
+		    -moz-animation:spinoffPulse 1s infinite linear;
+		    -webkit-animation:spinoffPulse 1s infinite linear;
+		}
+		@-moz-keyframes spinPulse {
+		    0% { -moz-transform:rotate(160deg); opacity:0; box-shadow:0 0 1px #2187e7;}
+		    50% { -moz-transform:rotate(145deg); opacity:1; }
+		    100% { -moz-transform:rotate(-320deg); opacity:0; }
+		}
+		@-moz-keyframes spinoffPulse {
+		    0% { -moz-transform:rotate(0deg); }
+		    100% { -moz-transform:rotate(360deg);  }
+		}
+		@-webkit-keyframes spinPulse {
+		    0% { -webkit-transform:rotate(160deg); opacity:0; box-shadow:0 0 1px #2187e7; }
+		    50% { -webkit-transform:rotate(145deg); opacity:1;}
+		    100% { -webkit-transform:rotate(-320deg); opacity:0; }
+		}
+		@-webkit-keyframes spinoffPulse {
+		    0% { -webkit-transform:rotate(0deg); }
+		    100% { -webkit-transform:rotate(360deg); }
+		}
+    </style>
+    <script src="file:///android_asset/jquery.2.1.1.min.js"></script>
+    <script>
+		$( document ).bind( 'mobileinit', function(){
+		    $.mobile.loader.prototype.options.html = '<div class="loadingContainer"><div class="loadingContent"><div class="loadingCircle"></div><div class="loadingCircle1"></div></div></div>';
+		});
+    </script>
+    <script src="file:///android_asset/jquery.mobile.1.4.3.min.js"></script>
+	<script>
+		var errorCode,
+			videoCodecNames = {h264: {name: 'H.264', extra: '(Recommended)'},
+				flv1: {name: 'FLV1 Sorenson Spark', extra: '(most compatible)'}},
+			audioCodecNames = {aac: {name: 'AAC', extra: '(Recommended)'},
+				mp3: {name: 'MP3', extra: ''}},
+			qualityNames = {q1: {name: 'Q1', extra: '(lowest)'},
+				q2: {name: 'Q2', extra: '(medium)'},
+				q3: {name: 'Q3', extra: '(highest)'}}, camResolutions,
+				timeoutPlayerID, timeoutPreviewID, timeoutUpdateID, isUpdatingValues, doPreview = true, isDoingPreview, doPreviewObj,
+				doPlay, isDoingPlay, doPlayObj, camWidth, camHeight, camRatio, devDisplayInfo, devDisplayDensity,
+				isToConnect;
+	
+		applyVerticalCentering = function() {
+	        $(this).on('pagebeforeshow',function(e,data){
+	            $('[data-vertical-centered]').hide();
+	        });
+	
+	        $(this).on('pageshow resize',function(e,data){    
+	            $('[data-vertical-centered]').each(function(index){
+	                var _this = $(this);
+	                if ($(window).height() >= _this.outerHeight() && ($(window).height() - $("div[data-role='header']").height() - $("div[data-role='footer']").height()) > $("div[data-role='main']").height()) {
+	                    _this.css('margin-top',($(window).height() - $("div[data-role='header']").height() - $("div[data-role='footer']").height() - _this.outerHeight())/2);
+	                }
+	                _this.show();
+	            });
+	        });
+	    }();
+
+	    $.fn.enterKey = function(fnc) {
+	        return this.each(function () {
+	            $(this).keypress(function(ev) {
+	                var keycode = (ev.keyCode ? ev.keyCode : ev.which);
+	                if (keycode == '13') {
+	                    fnc.call(this,ev);
+	                }
+	            })
+	        })
+	    }
+	
+		function onRTMPURLUpdate(val) {
+			if (val != null)
+				$('#url_set').val(val);
+		}
+		
+		function onKeyboardShown(val) {
+	    	console.log('javaEvtKeyboardShown'); 
+		}
+		
+	    function onBackgroundStateChange(val) { 
+	    	console.log('onBackgroundStateChange');
+	    }
+	    
+	    //slow functions calls
+		function updateValuesCall() {
+			if (isUpdatingValues)
+				return;
+				
+			if (timeoutUpdateID) {
+				clearTimeout(timeoutUpdateID);
+			}
+			$.mobile.loading('show');
+			timeoutUpdateID = setTimeout(function() { updateValues(); }, 300);
+		}
+		
+		function localPreviewDisplayCall() {
+			if (timeoutPreviewID) {
+				clearTimeout(timeoutPreviewID);
+			}
+			timeoutPreviewID = setTimeout(function() {
+				if (showPreviewCheck()) {
+					_topMargin = (120 - (160 / camRatio)) / 2;
+					
+					console.log('offset top ' + doPreviewObj.offsetTop);
+//		    			2560, 1440, 0, 0);
+		    		window.nowuseeme.localPreviewDisplay(true,
+		    			160 * devDisplayDensity, (160 * devDisplayDensity / camRatio), 
+		    			(doPreviewObj.offsetLeft + 4) * devDisplayDensity ,
+		    			(doPreviewObj.offsetTop - $(window).scrollTop() + 4 + _topMargin) * devDisplayDensity);
+		    	};
+			}, 100);
+		}
+
+		function videoPlayerDisplayCall() {
+			if (timeoutPlayerID) {
+				clearTimeout(timeoutPlayerID);
+			}
+			timeoutPlayerID = setTimeout(function() {
+				if (showPlayerCheck()) {
+					_topMargin = 0;
+					
+					//, 2560, 1440, 10, 10);
+					window.nowuseeme.viewVideoDisplay(true,
+		    			160 * devDisplayDensity, 120 * devDisplayDensity,
+		    			(doPlayObj.offsetLeft + 4) * devDisplayDensity ,
+		    			(doPlayObj.offsetTop - $(window).scrollTop() + 4 + _topMargin) * devDisplayDensity);
+				};
+			}, 100);
+		}
+		
+		function isScrolledIntoView(elem, partial){
+			return true;
+		    var docViewTop = $(window).scrollTop();
+		    var docViewBottom = docViewTop + $(window).height();
+		
+		    var elemTop = $(elem).offset().top;
+		    var elemBottom = elemTop + $(elem).height();
+		
+			if (typeof partial != 'undefined' && partial) {
+		    	return ((elemTop <= docViewBottom) && (elemBottom >= docViewTop));
+		    } else {
+		    	return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+		    }
+		}
+		
+		$(document).on('pageshow', '[data-role=page]', function () { 
+			$(window).resize(); 
+		});
+		
+		$(document).on('pagebeforehide', '[data-role=page]', function(e, data) {
+    		window.nowuseeme.localPreviewDisplay(false,	-1, -1, -1, -1); 
+    		window.nowuseeme.viewVideoDisplay(false, -1, -1, -1, -1);
+		});
+		
+		
+		
+		$(window).resize(function(e) {
+			if (showPreviewCheck()) {
+				localPreviewDisplayCall();
+	    	} else {
+	    		window.nowuseeme.localPreviewDisplay(false,	-1, -1, -1, -1); 
+				if (timeoutPreviewID) {
+					clearTimeout(timeoutPreviewID);
+				}
+	    	}
+
+	    	if (showPlayerCheck()) {
+	    		videoPlayerDisplayCall();
+	    	} else {
+	    		window.nowuseeme.viewVideoDisplay(false, -1, -1, -1, -1);
+	    		if (timeoutPlayerID) {
+	    			clearTimeout(timeoutPlayerID);
+	    		}
+	    	}
+		});
+		
+		function showPreviewCheck() {
+			return doPreview &&
+				$.mobile.activePage.attr('id') == 'pageServer' && isScrolledIntoView(doPreviewObj, true);
+		}
+
+		function showPlayerCheck() {
+			return doPlay &&
+				$.mobile.activePage.attr('id') == 'pageClient' && isScrolledIntoView(doPlayObj, true);
+		}
+		
+		$(document).on('scrollstart', function(){
+			if (timeoutPreviewID) {
+				clearTimeout(timeoutPreviewID);
+			}
+    		window.nowuseeme.localPreviewDisplay(false,	-1, -1, -1, -1);
+    		 
+    		if (timeoutPlayerID) {
+    			clearTimeout(timeoutPlayerID);
+    		}
+    		window.nowuseeme.viewVideoDisplay(false, -1, -1, -1, -1);
+		});
+		
+		$(document).on('scrollstop', function() { $(window).resize(); });
+		
+	    $( document ).ready(function() {
+	    	doPreviewObj = document.getElementById('doPreview');
+	    	doPlayObj = document.getElementById('doPlay');
+	    	
+	    	$('#goExit').click(function(e){
+	    		e.stopImmediatePropagation();
+	    		e.preventDefault();
+	    		window.nowuseeme.exit();
+	    	});
+	    	
+	    	setInterval(function(){
+	    		var s = window.nowuseeme.jsQueueGet();
+	    		if (s) {
+	    			eval(s);
+	    		}
+	    	}, 100);
+	    	
+	    	window.nowuseeme.javascriptInit(true, '', true);
+	    	window.nowuseeme.toggleActionBar(false);
+	    	devDisplayInfo = jQuery.parseJSON(window.nowuseeme.displayInfoGet());
+	    	devDisplayDensity = (devDisplayInfo != null ? devDisplayInfo.density : window.devicePixelRatio);
+
+/*	    	$('#doPreview').click(function(e){
+	    		doPreview = !doPreview;
+    			$('#doPreview').html(doPreview ? 'updating...' : 'Preview area');
+    			$('#doPreview').css('background-color', (doPreview ? '#000' : '#AAA'));
+				$(window).resize();
+	    	});*/
+	    	
+			var val = window.nowuseeme.videoServerURLGet();
+			if (val != null)
+				$('#url_set').val(val);
+				
+			setInterval(function(){showError()}, 1000);
+			
+			$('#fps').empty().change(function() {
+				$('.lastResult').html(window.nowuseeme.videoFPSSet(parseInt(this.value)));//(window.nowuseeme.videoFPSSet(parseInt(this.value))));
+				updateValuesCall();
+			});
+			$('#camera').empty().change(function() {
+				$('.lastResult').html(window.nowuseeme.videoCameraSet(parseInt(this.value)));
+				updateValuesCall();
+			});
+			$('#quality').empty().change(function() {
+				$('.lastResult').html(window.nowuseeme.videoQualitySet(this.value));
+				updateValuesCall();
+			});
+			$('#audiocodec').empty().change(function() {
+				$('.lastResult').html(window.nowuseeme.audioCodecSet(this.value));
+				updateValuesCall();
+			});
+			$('#videocodec').empty().change(function() {
+				$('.lastResult').html(window.nowuseeme.videoCodecSet(this.value));
+				updateValuesCall();
+			});
+			$('#resolution').empty().change(function() {
+				var _res = camResolutions[this.value];
+				$('.lastResult').html(window.nowuseeme.videoResolutionSet(parseInt(_res['w']), parseInt(_res['h'])));
+				updateValuesCall();
+			});
+			
+			$('#btnBWLimit').bind('click', function(event, ui) {
+				var _res = parseInt($('#bwLimit').val());
+				$('.lastResult').html(window.nowuseeme.videoBandwidthSet(_res));
+				updateValuesCall();
+			});
+
+			$('#btnKFInt').bind('click', function(event, ui) {
+				var _res = parseInt($('#kfInt').val());
+				$('.lastResult').html(window.nowuseeme.videoKeyFrameIntervalSet(_res));
+				updateValuesCall();
+			});
+			
+		    function appExit() {
+		    	window.nowuseeme.exit();
+		    }
+	    
+			updateValuesCall();
+	    });	
+	    
+	    function updateValues() {
+			var _cameras, _camID, _camDetails, _camFPS, 
+				_camResolutions, _camGOP, 
+				_videoCodecs, _videoCodecID, _bandwidth, _qualityID, 
+				_audioCodecs, _audioCodecID;
+				
+			isUpdatingValues = true; 
+			setTimeout(function() {
+		    	timeoutUpdateID = 0;
+
+				camWidth = window.nowuseeme.videoResolutionWidthGet();
+				camHeight = window.nowuseeme.videoResolutionHeightGet();
+				camRatio = camWidth / camHeight;
+				_camFPS = window.nowuseeme.videoFPSGet();
+				_camID = window.nowuseeme.videoCameraGet();
+				_videoCodecs = jQuery.parseJSON(window.nowuseeme.videoCodecsGet()); //["h264","flv1"]
+				_videoCodecID = window.nowuseeme.videoCodecNameGet();
+				_audioCodecs = jQuery.parseJSON(window.nowuseeme.audioCodecsGet());
+				_audioCodecID = window.nowuseeme.audioCodecNameGet();
+				_qualityID = window.nowuseeme.videoQualityGet();
+	
+				$('#bwLimit').val(_bandwidth = window.nowuseeme.videoBandwidthGet());
+				$('#kfInt').val(_camGOP = window.nowuseeme.videoKeyFrameIntervalGet());
+	
+				$('#fps').children().remove().end();
+				for (var i = 30; i > 0; i--) {
+					$('#fps').append('<option value="' + i + '" ' +
+						(i == _camFPS ? 'selected' : '') + '>' +
+						i + '</option>');
+				}
+				$("#fps").trigger("change");
+				 
+				$('#quality').children().remove().end();
+				$.each(qualityNames, function (index, value) {
+					$('#quality').append('<option value="' + index + '" ' +
+						(index == _qualityID ? 'selected' : '') + '>' +
+						value['name'] + ' ' + 
+						value['extra'] + '</option>');
+				});
+				$("#quality").trigger("change");
+	
+				$('#audiocodec').children().remove().end();
+				$.each(_audioCodecs, function (index, value) {
+					$('#audiocodec').append('<option value="' + value + '" ' +
+						(value == _audioCodecID ? 'selected' : '') + '>' +
+						audioCodecNames[value]['name'] + ' ' + 
+						audioCodecNames[value]['extra'] + '</option>');
+				});
+				$("#audiocodec").trigger("change");
+	
+				$('#videocodec').children().remove().end();
+				$.each(_videoCodecs, function (index, value) {
+					$('#videocodec').append('<option value="' + value + '" ' +
+						(value == _videoCodecID ? 'selected' : '') + '>' +
+						videoCodecNames[value]['name'] + ' ' + 
+						videoCodecNames[value]['extra'] + '</option>');
+				});
+				$("#videocodec").trigger("change");
+				
+				_cameras = jQuery.parseJSON(window.nowuseeme.videoCamerasGet());
+				cameras = _cameras;
+				$('#camera').children().remove().end();
+				$.each(cameras, function(index, value){
+					$('#camera').append('<option value="' + value['id'] + '" ' + 
+						(_camID == value['id'] ? 'selected' : '') + '>' +
+						value['facing'] + '</option>');
+				});
+				$("#camera").trigger("change");
+	
+				console.log('beforevideoResolutionsGet');
+				console.log(window.nowuseeme.videoResolutionsGet());
+				_camResolutions = jQuery.parseJSON(window.nowuseeme.videoResolutionsGet());
+				camResolutions = _camResolutions;
+				$('#resolution').children().remove().end();
+				$.each(camResolutions, function(index, value){
+					if (value['w'] <= 1920 && value['h'] <= 1088) {
+						$('#resolution').append('<option value="' + index + '" ' +
+							(camWidth == value['w'] && camHeight == value['h'] ? 'selected' : '') + '>' + 
+							value['w'] + 'x' + value['h'] + '</option>');
+					}
+				});
+				$("#resolution").trigger("change");
+				isUpdatingValues = false; 
+				$.mobile.loading('hide');
+			}, 50);
+	    }
+	    
+    	function showError() {
+			var _errorCode = window.nowuseeme.getLatestErrorCode();
+			if (errorCode != _errorCode) {
+				$('.lastResult').html((_errorCode != 0 ? _errorCode + ' - ' : '') + window.nowuseeme.getLatestErrorText());
+			}
+		}
+		
+		function connect() {
+			$.mobile.loading('show');
+			var url= document.getElementById("url_set").value;
+			var urlCli = document.getElementById('url_get');
+			if (!urlCli.value) {
+				urlCli.value = url;
+			}
+			setTimeout(function() { 
+				window.nowuseeme.connect(url); 
+				$.mobile.loading('hide');
+				//updateValues();
+			}, 10);
+		}
+		
+		function clientConnectToggle() {
+			if (doPlay) {
+				doPlay = false;
+			} else {
+				doPlay = document.getElementById("url_get").value;
+				window.nowuseeme.viewVideoDisplay(true, 160 * devDisplayDensity, 120 * devDisplayDensity, (doPlayObj.offsetLeft + 4) * devDisplayDensity , (doPlayObj.offsetTop - $(window).scrollTop() + 4 + _topMargin) * devDisplayDensity);
+			}
+			
+    		$('#doPlayCmd').html(!!doPlay ? 'Disconnect' : 'Connect');
+    		$('#doPlay').html(!!doPlay ? 'updating...' : 'Video player');
+    		$('#doPlay').css('background-color', (!!doPlay ? '#000' : '#AAA'));
+			window.nowuseeme.videoPublishSet(doPlay, !!doPlay);
+			$(window).resize();
+		}
+		
+	</script>
+	<script id="panel-init">
+	    $(function() {
+	      $( "body>[data-role='panel']" ).panel().enhanceWithin();
+	    });
+	</script>
+</head>
+<body>
+<div data-role="page" id="pageServer" data-theme="a">
+    <div data-role="header" data-theme="b" data-position="fixed"><h1 style="text-align:left; margin-left:10px;">Now you see me - RTMP Publish</h1>
+       <a data-role="none"></a>
+       <a href="#appmenu" data-icon="bars" data-iconpos="notext">Menu</a>
+    </div>
+    <div data-role="content" id="serverMode">
+        <div data-role="fieldcontain">
+            <label for="url_set">Publish URL</label>
+            <div class="ui-grid-a">
+                <div class="ui-block-a">
+                    <input data-mini="true" placeholder="i.e. rtmp://rtmpserver/app/streamkey" type="text" name="url_set" id="url_set" />
+                </div>
+                <div class="ui-block-b">
+                    <input data-mini="true" type="submit" value="Scan QR code" onclick="window.nowuseeme.barcodeScan();" />
+                </div>
+            </div>
+        </div>
+
+        <div data-role="fieldcontain">
+            <label for="camera" class="select">Resolution</label>
+            <select data-mini="true" name="camera" id="camera" data-native-menu="true">
+            </select>
+        </div>
+
+        <div data-role="fieldcontain">
+            <label for="resolution" class="select">Resolution</label>
+            <select data-mini="true" name="resolution" id="resolution" data-native-menu="true">
+            </select>
+        </div>
+
+        <div data-role="fieldcontain">
+            <label for="videocodec" class="select">Video codec</label>
+            <select data-mini="true" name="videocodec" id="videocodec" data-native-menu="true">
+            </select>
+        </div>
+
+        <div data-role="fieldcontain">
+            <label for="fps" class="select">Frames per second</label>
+            <select data-mini="true" name="fps" id="fps" data-native-menu="true">
+            </select>
+        </div>
+
+        <div data-role="fieldcontain">
+            <label for="bwLimit">Bandwidth limit</label>
+            <div class="ui-grid-a">
+                <div class="ui-block-a">
+                    <input data-mini="true" placeholder="e.g. 409600" type="text" name="bwLimit" id="bwLimit" value="" />
+                </div>
+                <div class="ui-block-b">
+                    <input id="btnBWLimit" data-mini="true" type="submit" value="set"/>
+                </div>
+            </div>
+        </div>
+        
+        <div data-role="fieldcontain">
+            <label for="kfInt">KeyFrame interval (GOP)</label>
+            <div class="ui-grid-a">
+                <div class="ui-block-a">
+                    <input data-mini="true" placeholder="e.g. 30" type="text" name="kfInt" id="kfInt" value="" />
+                </div>
+                <div class="ui-block-b">
+                    <input id="btnKFInt" data-mini="true" type="submit" value="set"/>
+                </div>
+            </div>
+        </div>
+
+        <div data-role="fieldcontain">
+            <label for="quality" class="select">Quality</label>
+            <select data-mini="true" name="quality" id="quality" data-native-menu="true">
+            </select>
+        </div>
+
+        <div data-role="fieldcontain">
+            <label for="audiocodec" class="select">Audio codec</label>
+            <select data-mini="true" name="audiocodec" id="audiocodec" data-native-menu="true">
+            </select>
+        </div>
+    </div>
+    <div data-role="footer" data-theme="a" data-position="fixed">
+    	<div class="ui-grid-b">
+    		<div class="ui-block-a"><div class="doPreview">Preview area</div></div>
+    		<div class="ui-block-b"><div class="doPlay">Play area</div></div>
+    		<div class="ui-block-c stausBox"><a id="doPublishCmd" data-mini="true" data-role="button" onclick="connect();">Connect</a><br/>
+    			<strong>Last status: </strong><span class="lastResult">loading...</span></div>
+    	</div>
+    </div>
+</div>
+
+<div data-role="page" id="pageClient" data-theme="a">
+    <div data-role="header"><h1>Now you see me - RTMP Play</h1>
+       <a data-role="none"></a>
+       <a href="#appmenu" data-icon="bars" data-iconpos="notext">Menu</a>
+    </div>
+    <div data-role="content" id="clientMode">
+        <div data-role="fieldcontain">
+            <label for="url_get">Stream URL</label>
+            <input data-mini="true" placeholder="i.e. rtmp://rtmpserver/app/streamkey" type="text" name="url_get" id="url_get" />
+        </div>
+
+        <div data-role="fieldcontain">
+            <p><a id="doPlayCmd" data-mini="true" onclick="clientConnectToggle();" data-role="button">Connect</a></p>
+        </div>
+        <div id="doPlay">
+        	Video player
+    	</div>
+    </div>
+    <div data-role="footer" data-theme="a" data-position="fixed">
+    	<div class="ui-grid-b">
+    		<div class="ui-block-a"><div class="doPreview">Preview area</div></div>
+    		<div class="ui-block-b"><div class="doPlay">Play area</div></div>
+    		<div class="ui-block-c stausBox"><a id="doPublishCmd" data-mini="true" data-role="button" onclick="connect();">Connect</a><br/>
+    			<strong>Last status: </strong><span class="lastResult">loading...</span></div>
+    	</div>
+    </div>
+</div>
+
+<div data-role="page" id="pageHelp" data-theme="a">
+    <div data-role="header"><h1>Info page</h1>
+       <a data-role="none"></a>
+       <a href="#appmenu" data-icon="bars" data-iconpos="notext">Menu</a>
+    </div>
+    <div data-role="content" id="helpMode">
+        <p><b>Warning: Do not use this application without a WiFi connection unless you have an unlimited data plan.</b></p>
+        <p>This application was designed to be used in combination with an RTMP video server / proxy like nginx-rtmp, 
+        Wowza, FMS, CRTMPServer, EvoStream or online services like Ustream, Twitch and many others. It was created as an interface 
+        to the RTMP functionality found in the popular FFMPEG library.</p>
+        <p><b>Do not attempt to access the video stream directly without using one of the above mentioned solutions or an alternative!</b></p>
+        <p>While there are a number of similar applications available for mobile devices, this application will try to offer the following features:
+        <ul>
+                <li>FFMPEG based, should provide a familiar environment/codecs for those using FFMPEG solutions on other architectures</li>
+                <li>Compatible with external cameras (USB)</li>
+                <li>Possibility to integrate with other applications, websites (very soon)</li>
+                <li>Customizable interface to allow seemless integration with other applications, websites (soon)</li> 
+                <li>Similar functionality across different architectures (iOS/Android/others) (soon)</li>
+                <li>Hardware acceleration (soon)</li>
+                <li>Alternative Adobe Air version for increased compatibility (soon)</li>
+        </ul>
+        <p>The purpose of this first release is to receive feedback on the basic technology and it may contain bugs and unfinished functionality. Do not install it/use it if you expect a perfectly smooth experience.</p>
+        <br/>
+        <p><b>Usage</b></p>
+        <p>Input the URL to which you wish to stream in the "Publish URL" under "RTMP Publish" section. You should obtain this URL from the RTMP service you are using.</p>
+    </div>
+</div>
+
+<div data-role="page" data-theme="c" id="pagenotavailable">
+    <div data-role="header"><h2>Function not yet available</h2></div>
+    <div data-role="main" data-vertical-centered class="ui-content jqm-content">
+        <p>This function is not yet available for your device.</p><a href="#session" 
+        class="ui-btn ui-shadow ui-corner-all ui-btn-inline ui-mini ui-icon-back ui-btn-icon-left">Back</a>
+    </div>
+    <div data-role="footer" data-position="fixed" style="min-height: 1px;"></div>
+</div>
+
+<div data-role="panel" id="appmenu" data-position="right" data-display="overlay" data-theme="b">
+    <ul data-role="listview">
+        <li data-theme="b" data-icon="back"><a href="#" data-rel="close">Close menu</a></li>
+        <li data-role="button" data-icon="video"><a id="goPublish" target="_top" href="#pageServer">RTMP Publish</a></li>
+        <li data-icon="user"><a id="goPlay" target="_top" href="#pageClient">RTMP Play</a></li>
+        <li data-icon="info"><a id="goHelp" target="_top" href="#pageHelp">Info</a></li>
+        <li data-icon="forbidden"><a id="goExit" href="#">Exit</a></li>
+    </ul>
+</div>
+</body>
+</html>
